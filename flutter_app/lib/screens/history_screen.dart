@@ -58,6 +58,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       appBar: AppBar(
         backgroundColor: eBg,
         elevation: 0,
+        automaticallyImplyLeading: false,
         title: Text(
           '통화 기록',
           style: GoogleFonts.notoSerifKr(

@@ -207,34 +207,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFFC0553F),
         elevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: IconButton(
-            icon: Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white,
-                border: Border.all(color: eLine, width: 2),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFFC0553F).withOpacity(0.2),
-                    blurRadius: 6,
-                    spreadRadius: 1,
-                  ),
-                ],
-              ),
-              child: const Icon(Icons.chevron_left, color: Color(0xFFC0553F), size: 24),
-            ),
-            onPressed: () => Navigator.pop(context),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(
-              minWidth: 44,
-              minHeight: 44,
-            ),
-          ),
-        ),
+        automaticallyImplyLeading: false,
         title: Text(
           '비상 연락',
           style: GoogleFonts.notoSerifKr(

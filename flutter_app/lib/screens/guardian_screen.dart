@@ -206,16 +206,6 @@ class _GuardianScreenState extends State<GuardianScreen> {
                         color: const Color(0xFF4CAF50),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildStatCard(
-                        title: '확인 필요',
-                        value:
-                            '${_alerts.where((a) => a['elder'] == _selectedElder['name']).length}건',
-                        subtitle: '',
-                        color: const Color(0xFFFFA726),
-                      ),
-                    ),
                   ],
                 ),
                 const SizedBox(height: 32),
@@ -297,52 +287,186 @@ class _GuardianScreenState extends State<GuardianScreen> {
   }
 
   Widget _buildElderSelector() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final menuWidth = constraints.maxWidth;
+        final maxMenuHeight = MediaQuery.sizeOf(context).height * 0.5;
+        return _buildElderMenuAnchor(menuWidth, maxMenuHeight);
+      },
+    );
+  }
+
+  Widget _buildElderMenuAnchor(double menuWidth, double maxMenuHeight) {
+    const menuPadding = 6.0;
+    const itemPadding = 4.0;
+    final tileWidth = menuWidth - (menuPadding + itemPadding) * 2 - 2;
+
+    return MenuAnchor(
+      crossAxisUnconstrained: false,
+      alignmentOffset: const Offset(0, 8),
+      style: MenuStyle(
+        backgroundColor: const WidgetStatePropertyAll(eCard),
+        surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
+        elevation: const WidgetStatePropertyAll(3),
+        shadowColor: WidgetStatePropertyAll(eInk.withValues(alpha: 0.12)),
+        padding: const WidgetStatePropertyAll(EdgeInsets.all(menuPadding)),
+        minimumSize: WidgetStatePropertyAll(Size(menuWidth, 0)),
+        maximumSize: WidgetStatePropertyAll(Size(menuWidth, maxMenuHeight)),
+        shape: WidgetStatePropertyAll(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: eLine),
+          ),
+        ),
+      ),
+      menuChildren: [
+        for (final elder in _elders)
+          MenuItemButton(
+            style: ButtonStyle(
+              overlayColor: WidgetStatePropertyAll(eAccent.withValues(alpha: 0.08)),
+              padding: const WidgetStatePropertyAll(
+                EdgeInsets.all(itemPadding),
+              ),
+              minimumSize: WidgetStatePropertyAll(Size(tileWidth, 0)),
+            ),
+            onPressed: () => setState(() => _selectedElder = elder),
+            child: _buildElderMenuTile(elder, tileWidth),
+          ),
+      ],
+      builder: (context, controller, child) {
+        final selectedName = (_selectedElder['name'] as String?) ?? '선택';
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () {
+              if (controller.isOpen) {
+                controller.close();
+              } else {
+                controller.open();
+              }
+            },
+            child: Ink(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: eCard,
+                border: Border.all(
+                  color: controller.isOpen ? eAccent : eLine,
+                  width: controller.isOpen ? 1.4 : 1,
+                ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: eAccentSoft,
+                    ),
+                    child: const Icon(
+                      Icons.person_rounded,
+                      color: eAccent,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '어르신 선택',
+                          style: GoogleFonts.notoSansKr(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: eInkSoft,
+                          ),
+                        ),
+                        Text(
+                          selectedName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.notoSansKr(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                            color: eInk,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    controller.isOpen
+                        ? Icons.keyboard_arrow_up_rounded
+                        : Icons.keyboard_arrow_down_rounded,
+                    color: eAccent,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildElderMenuTile(Map<String, dynamic> elder, double width) {
+    final selected = elder['id'] == _selectedElder['id'];
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      width: width,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       decoration: BoxDecoration(
-        color: eCard,
-        border: Border.all(color: eLine),
+        color: selected ? eAccentSoft : Colors.transparent,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          const Icon(Icons.person_outline_rounded, color: eAccent),
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: selected ? eCard : eAccentSoft,
+            ),
+            child: Icon(
+              Icons.person_rounded,
+              color: selected ? eAccent : eInkSoft,
+              size: 20,
+            ),
+          ),
           const SizedBox(width: 10),
-          Text(
-            '어르신 선택',
-            style: GoogleFonts.notoSansKr(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: eInkSoft,
-            ),
-          ),
-          const SizedBox(width: 12),
           Expanded(
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<Map<String, dynamic>>(
-                value: _selectedElder,
-                isExpanded: true,
-                dropdownColor: eCard,
-                style: GoogleFonts.notoSansKr(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: eInk,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  elder['name'] as String,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.notoSansKr(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: eInk,
+                  ),
                 ),
-                items: _elders.map((elder) {
-                  return DropdownMenuItem<Map<String, dynamic>>(
-                    value: elder,
-                    child: Text(elder['name'] as String),
-                  );
-                }).toList(),
-                onChanged: (elder) {
-                  if (elder == null) return;
-                  setState(() {
-                    _selectedElder = elder;
-                  });
-                },
-              ),
+                Text(
+                  '${elder['age']}세',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.notoSansKr(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: eInkSoft,
+                  ),
+                ),
+              ],
             ),
           ),
+          if (selected)
+            const Icon(Icons.check_rounded, color: eAccent, size: 20),
         ],
       ),
     );

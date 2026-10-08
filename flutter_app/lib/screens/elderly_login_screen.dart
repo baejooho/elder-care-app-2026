@@ -62,26 +62,6 @@ class _ElderlyLoginScreenState extends State<ElderlyLoginScreen> {
     }
   }
 
-  Future<void> _quickStart() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    final result = await AuthService.quickStart();
-
-    setState(() {
-      _isLoading = false;
-    });
-
-    if (result['success']) {
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const ElderlyHomePage()),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -245,61 +225,6 @@ class _ElderlyLoginScreenState extends State<ElderlyLoginScreen> {
                               color: Colors.white,
                             ),
                           ),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // 구분선
-                Row(
-                  children: [
-                    Expanded(
-                      child: Divider(
-                        color: eLine,
-                        thickness: 1,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Text(
-                        '또는',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: eInkSoft,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Divider(
-                        color: eLine,
-                        thickness: 1,
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 16),
-
-                // 즉시 시작 버튼
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: OutlinedButton(
-                    onPressed: _isLoading ? null : _quickStart,
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: eAccent),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      '인증 없이 즉시 시작',
-                      style: GoogleFonts.notoSansKr(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: eAccent,
-                      ),
-                    ),
                   ),
                 ),
 

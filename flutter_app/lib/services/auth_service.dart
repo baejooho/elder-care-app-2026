@@ -70,19 +70,6 @@ class AuthService {
     }
   }
 
-  // 즉시 시작 (비로그인)
-  static Future<Map<String, dynamic>> quickStart() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_userTypeKey, 'elderly');
-      await prefs.setBool(_isLoggedInKey, false);
-
-      return {'success': true, 'message': '즉시 시작'};
-    } catch (e) {
-      return {'success': false, 'message': '시작 실패: $e'};
-    }
-  }
-
   // 보호자 회원가입
   static Future<Map<String, dynamic>> guardianSignup({
     required String name,
