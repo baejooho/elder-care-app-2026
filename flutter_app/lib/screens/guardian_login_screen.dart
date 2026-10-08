@@ -49,6 +49,13 @@ class _GuardianLoginScreenState extends State<GuardianLoginScreen> {
       return;
     }
 
+    if (_passwordController.text.length < 6) {
+      setState(() {
+        _errorMessage = '비밀번호는 6자 이상이어야 합니다.';
+      });
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -65,9 +72,9 @@ class _GuardianLoginScreenState extends State<GuardianLoginScreen> {
 
     if (result['success']) {
       if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
+      Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const GuardianHomePage()),
+        (route) => false,
       );
     } else {
       setState(() {

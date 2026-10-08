@@ -51,9 +51,9 @@ class _ElderlyLoginScreenState extends State<ElderlyLoginScreen> {
 
     if (result['success']) {
       if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
+      Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const ElderlyHomePage()),
+        (route) => false,
       );
     } else {
       setState(() {

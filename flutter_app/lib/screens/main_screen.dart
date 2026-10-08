@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -26,6 +28,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   late String _currentTime;
   String _friendName = 'AI 친구';
+  Timer? _timeUpdateTimer;
 
   @override
   void initState() {
@@ -44,9 +47,11 @@ class _MainScreenState extends State<MainScreen> {
         _showSetFriendNameDialog();
       }
     } else {
-      setState(() {
-        _friendName = savedName;
-      });
+      if (mounted) {
+        setState(() {
+          _friendName = savedName;
+        });
+      }
     }
   }
 
@@ -117,11 +122,10 @@ class _MainScreenState extends State<MainScreen> {
                   final prefs = await SharedPreferences.getInstance();
                   await prefs.setString('ai_friend_name', nameController.text);
 
-                  setState(() {
-                    _friendName = nameController.text;
-                  });
-
                   if (mounted) {
+                    setState(() {
+                      _friendName = nameController.text;
+                    });
                     Navigator.pop(context);
                   }
                 }
@@ -149,10 +153,18 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _updateTime() {
+    if (!mounted) return;
+
     setState(() {
       _currentTime = DateFormat('H:mm').format(DateTime.now());
     });
-    Future.delayed(const Duration(minutes: 1), _updateTime);
+    _timeUpdateTimer = Timer(const Duration(minutes: 1), _updateTime);
+  }
+
+  @override
+  void dispose() {
+    _timeUpdateTimer?.cancel();
+    super.dispose();
   }
 
   @override

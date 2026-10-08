@@ -24,7 +24,6 @@ class _GuardianAccountScreenState extends State<GuardianAccountScreen> {
   bool _notificationsEnabled = true;
   bool _emailNotificationsEnabled = true;
   bool _smsNotificationsEnabled = false;
-  bool _showConnectionCode = false;
 
   @override
   void initState() {
@@ -74,11 +73,11 @@ class _GuardianAccountScreenState extends State<GuardianAccountScreen> {
               onPressed: () async {
                 await AuthService.logout();
                 if (!mounted) return;
-                Navigator.pushReplacement(
-                  context,
+                Navigator.of(context).pushAndRemoveUntil(
                   MaterialPageRoute(
                     builder: (context) => const RoleSelectionScreen(),
                   ),
+                  (route) => false,
                 );
               },
               child: Text(
@@ -181,78 +180,26 @@ class _GuardianAccountScreenState extends State<GuardianAccountScreen> {
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: const Color(
-                                        0xFF4CAF50,
-                                      ).withOpacity(0.15),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: const Text(
-                                      '활성 중',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        color: Color(0xFF4CAF50),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  TextButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        _showConnectionCode =
-                                            !_showConnectionCode;
-                                      });
-                                    },
-                                    style: TextButton.styleFrom(
-                                      padding: EdgeInsets.zero,
-                                      minimumSize: Size.zero,
-                                      tapTargetSize:
-                                          MaterialTapTargetSize.shrinkWrap,
-                                    ),
-                                    child: Text(
-                                      _showConnectionCode
-                                          ? '연결코드 숨기기'
-                                          : '연결코드 확인하기',
-                                      style: GoogleFonts.notoSansKr(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        color: eAccent,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              if (_showConnectionCode) ...[
-                                const SizedBox(height: 10),
-                                Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: eAccent.withOpacity(0.08),
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      color: eAccent.withOpacity(0.25),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    '보호자 연결 코드: '
-                                    '${_guardianInfo['connectionCode'] ?? '-'}',
-                                    style: GoogleFonts.notoSansKr(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                      color: eAccent,
-                                    ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(
+                                    0xFF4CAF50,
+                                  ).withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Text(
+                                  '활성 중',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF4CAF50),
                                   ),
                                 ),
-                              ],
+                              ),
                             ],
                           ),
                         ),

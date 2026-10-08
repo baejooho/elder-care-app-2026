@@ -55,45 +55,6 @@ class _ElderlyDetailScreenState extends State<ElderlyDetailScreen> {
     return '${_periodDate.year}년 ${_periodDate.month}월';
   }
 
-  Future<DateTime?> _showReportDatePicker(DateTime initialDate) {
-    final now = DateTime.now();
-    final lastDate = DateTime(now.year, now.month, now.day);
-    final firstDate = DateTime(2024, 1, 1);
-    var safeInitial = initialDate;
-    if (safeInitial.isAfter(lastDate)) {
-      safeInitial = lastDate;
-    } else if (safeInitial.isBefore(firstDate)) {
-      safeInitial = firstDate;
-    }
-
-    return showDatePicker(
-      context: context,
-      initialDate: safeInitial,
-      firstDate: firstDate,
-      lastDate: lastDate,
-      locale: const Locale('ko', 'KR'),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: eAccent,
-              onPrimary: Colors.white,
-              onSurface: eInk,
-            ),
-            textTheme: Theme.of(
-              context,
-            ).textTheme.apply(fontFamily: 'NotoSansKR'),
-          ),
-          child: Localizations.override(
-            context: context,
-            locale: const Locale('ko', 'KR'),
-            child: child!,
-          ),
-        );
-      },
-    );
-  }
-
   Future<DateTime?> _showMonthPicker(DateTime initialDate) {
     var selectedYear = initialDate.year;
     final now = DateTime.now();
@@ -218,12 +179,31 @@ class _ElderlyDetailScreenState extends State<ElderlyDetailScreen> {
     );
   }
 
+  Future<DateTime?> _showDayPicker(DateTime initialDate) {
+    return _showCalendarPicker(initialDate, selectByWeek: false);
+  }
+
   Future<DateTime?> _showWeekPicker(DateTime initialDate) {
-    var visibleMonth = DateTime(initialDate.year, initialDate.month);
-    final selectedWeekStart = _weekStart(initialDate);
+    return _showCalendarPicker(initialDate, selectByWeek: true);
+  }
+
+  Future<DateTime?> _showCalendarPicker(
+    DateTime initialDate, {
+    required bool selectByWeek,
+  }) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final firstDate = DateTime(2024, 1, 1);
+    var safeInitial = DateTime(initialDate.year, initialDate.month, initialDate.day);
+    if (safeInitial.isAfter(today)) {
+      safeInitial = today;
+    } else if (safeInitial.isBefore(firstDate)) {
+      safeInitial = firstDate;
+    }
+
+    var visibleMonth = DateTime(safeInitial.year, safeInitial.month);
+    final selectedWeekStart = _weekStart(safeInitial);
+    final selectedDay = safeInitial;
     const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
 
     return showDialog<DateTime>(
@@ -314,52 +294,136 @@ class _ElderlyDetailScreenState extends State<ElderlyDetailScreen> {
                           ];
                           final weekStart = weekDays.first;
                           final weekEnd = weekDays.last;
-                          final isSelected = weekStart == selectedWeekStart;
-                          final isFutureWeek = weekStart.isAfter(today);
-                          final isTooOld = weekEnd.isBefore(firstDate);
-                          final enabled = !isFutureWeek && !isTooOld;
+
+                          if (selectByWeek) {
+                            final isSelected = weekStart == selectedWeekStart;
+                            final isFutureWeek = weekStart.isAfter(today);
+                            final isTooOld = weekEnd.isBefore(firstDate);
+                            final enabled = !isFutureWeek && !isTooOld;
+
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 4),
+                              child: Material(
+                                color: isSelected
+                                    ? eAccent
+                                    : enabled
+                                    ? eBg
+                                    : eLine.withValues(alpha: 0.4),
+                                borderRadius: BorderRadius.circular(10),
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(10),
+                                  onTap: enabled
+                                      ? () => Navigator.pop(context, weekStart)
+                                      : null,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 8,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        for (final day in weekDays)
+                                          Expanded(
+                                            child: Text(
+                                              '${day.day}',
+                                              textAlign: TextAlign.center,
+                                              style: GoogleFonts.notoSansKr(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w600,
+                                                color: isSelected
+                                                    ? Colors.white
+                                                    : !enabled ||
+                                                          day.month !=
+                                                              visibleMonth
+                                                                  .month
+                                                    ? eInkSoft
+                                                    : eInk,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
 
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 4),
-                            child: Material(
-                              color: isSelected
-                                  ? eAccent
-                                  : enabled
-                                  ? eBg
-                                  : eLine.withValues(alpha: 0.4),
-                              borderRadius: BorderRadius.circular(10),
-                              child: InkWell(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: eBg,
                                 borderRadius: BorderRadius.circular(10),
-                                onTap: enabled
-                                    ? () => Navigator.pop(context, weekStart)
-                                    : null,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 8,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      for (final day in weekDays)
-                                        Expanded(
-                                          child: Text(
-                                            '${day.day}',
-                                            textAlign: TextAlign.center,
-                                            style: GoogleFonts.notoSansKr(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w600,
-                                              color: isSelected
-                                                  ? Colors.white
-                                                  : !enabled ||
-                                                        day.month !=
-                                                            visibleMonth.month
-                                                  ? eInkSoft
-                                                  : eInk,
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 4),
+                              child: Row(
+                                children: [
+                                  for (final day in weekDays)
+                                    Expanded(
+                                      child: Builder(
+                                        builder: (context) {
+                                          final isOutsideMonth =
+                                              day.month != visibleMonth.month;
+                                          final isFuture = day.isAfter(today);
+                                          final isTooOld = day.isBefore(
+                                            firstDate,
+                                          );
+                                          final enabled =
+                                              !isOutsideMonth &&
+                                              !isFuture &&
+                                              !isTooOld;
+                                          final isSelected =
+                                              day.year == selectedDay.year &&
+                                              day.month == selectedDay.month &&
+                                              day.day == selectedDay.day;
+
+                                          return Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 2,
                                             ),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ),
+                                            child: Material(
+                                              color: isSelected
+                                                  ? eAccent
+                                                  : Colors.transparent,
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              child: InkWell(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                                onTap: enabled
+                                                    ? () => Navigator.pop(
+                                                        context,
+                                                        day,
+                                                      )
+                                                    : null,
+                                                child: SizedBox(
+                                                  height: 36,
+                                                  child: Center(
+                                                    child: Text(
+                                                      '${day.day}',
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      style:
+                                                          GoogleFonts.notoSansKr(
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color: isSelected
+                                                            ? Colors.white
+                                                            : enabled
+                                                            ? eInk
+                                                            : eInkSoft,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                ],
                               ),
                             ),
                           );
@@ -435,8 +499,10 @@ class _ElderlyDetailScreenState extends State<ElderlyDetailScreen> {
           '오늘 오전 9시 30분부터 저녁 6시 45분까지 약 9시간 동안 총 3회의 대화가 이루어졌습니다. 아침에는 날씨가 좋다며 긍정적인 감정으로 하루를 시작했고, 낮 시간에는 손주를 만나고 싶은 마음을 표현했습니다. 저녁에는 AI 친구와의 통화로 활발한 상호작용을 보였습니다.',
       'depressionIndex': '2.4/10',
       'depressionStatus': '정상',
-      'conversationCount': '3회',
-      'conversationStatus': '활발함',
+      'callCount': '2회',
+      'callStatus': 'AI 통화',
+      'chatCount': '5회',
+      'chatStatus': 'AI 채팅',
       'activityStatus': '정상',
       'activitySteps': '7,245걸음',
       'healthStatus': '정상',
@@ -467,8 +533,10 @@ class _ElderlyDetailScreenState extends State<ElderlyDetailScreen> {
           '어제는 오전 10시부터 오후 4시까지 약 6시간 동안 2회의 대화가 있었습니다. 아침에는 다소 조용한 모습을 보였으나, 오후에 활동적인 대화를 나누며 기분이 좋아졌습니다. 수면이 충분했으며 활동량도 적절한 상태입니다.',
       'depressionIndex': '3.1/10',
       'depressionStatus': '정상',
-      'conversationCount': '2회',
-      'conversationStatus': '정상',
+      'callCount': '1회',
+      'callStatus': 'AI 통화',
+      'chatCount': '3회',
+      'chatStatus': 'AI 채팅',
       'activityStatus': '정상',
       'activitySteps': '5,800걸음',
       'healthStatus': '정상',
@@ -493,8 +561,10 @@ class _ElderlyDetailScreenState extends State<ElderlyDetailScreen> {
           '2일 전에는 오전 9시부터 저녁 8시까지 총 4회의 대화가 이루어졌습니다. 하루 종일 활발한 상호작용을 보였으며, 특히 손자와의 대화 시간이 길었습니다. 전반적으로 긍정적인 감정 상태를 유지했습니다.',
       'depressionIndex': '2.0/10',
       'depressionStatus': '정상',
-      'conversationCount': '4회',
-      'conversationStatus': '매우 활발함',
+      'callCount': '3회',
+      'callStatus': 'AI 통화',
+      'chatCount': '8회',
+      'chatStatus': 'AI 채팅',
       'activityStatus': '활동적',
       'activitySteps': '9,120걸음',
       'healthStatus': '정상',
@@ -592,36 +662,25 @@ class _ElderlyDetailScreenState extends State<ElderlyDetailScreen> {
                 }
               },
             ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatCard(
-                    title: '우울 수치',
-                    value: isWeekly ? '2.8/10' : '2.6/10',
-                    subtitle: '정상',
-                    color: const Color(0xFF4CAF50),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _buildStatCard(
-                    title: '대화 횟수',
-                    value: isWeekly ? '12회' : '48회',
-                    subtitle: isWeekly ? '주간 합계' : '월간 합계',
-                    color: eAccent,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _buildStatCard(
-                    title: '건강상태',
-                    value: '정상',
-                    subtitle: '이상 없음',
-                    color: const Color(0xFF4CAF50),
-                  ),
-                ),
-              ],
+            const SizedBox(height: 24),
+            Text(
+              isWeekly ? '주간 통계' : '월간 통계',
+              style: GoogleFonts.notoSerifKr(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: eInk,
+              ),
+            ),
+            const SizedBox(height: 12),
+            _buildStatsGrid(
+              depressionIndex: isWeekly ? '2.8/10' : '2.6/10',
+              depressionStatus: '정상',
+              healthStatus: '정상',
+              healthDetail: '이상 없음',
+              callCount: isWeekly ? '5회' : '20회',
+              callStatus: isWeekly ? '주간 AI 통화' : '월간 AI 통화',
+              chatCount: isWeekly ? '18회' : '72회',
+              chatStatus: isWeekly ? '주간 AI 채팅' : '월간 AI 채팅',
             ),
             const SizedBox(height: 24),
             Text(
@@ -695,7 +754,7 @@ class _ElderlyDetailScreenState extends State<ElderlyDetailScreen> {
               _buildDateSelector(
                 dateText: _selectedDate,
                 onTap: () async {
-                  final picked = await _showReportDatePicker(
+                  final picked = await _showDayPicker(
                     DateTime.parse(_selectedDate),
                   );
                   if (picked != null) {
@@ -717,41 +776,21 @@ class _ElderlyDetailScreenState extends State<ElderlyDetailScreen> {
               const SizedBox(height: 12),
 
               // 통계 그리드
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildStatCard(
-                      title: '우울 수치',
-                      value: data['depressionIndex'],
-                      subtitle: data['depressionStatus'],
-                      color: const Color(0xFF4CAF50),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _buildStatCard(
-                      title: '대화 횟수',
-                      value: data['conversationCount'],
-                      subtitle: data['conversationStatus'],
-                      color: eAccent,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _buildStatCard(
-                      title: '건강상태',
-                      value: data['healthStatus'],
-                      subtitle: data['healthDetail'],
-                      color: const Color(0xFF4CAF50),
-                    ),
-                  ),
-                ],
+              _buildStatsGrid(
+                depressionIndex: data['depressionIndex'] as String,
+                depressionStatus: data['depressionStatus'] as String,
+                healthStatus: data['healthStatus'] as String,
+                healthDetail: data['healthDetail'] as String,
+                callCount: data['callCount'] as String,
+                callStatus: data['callStatus'] as String,
+                chatCount: data['chatCount'] as String,
+                chatStatus: data['chatStatus'] as String,
               ),
               const SizedBox(height: 24),
 
-              // 전체 대화 요약
+              // 전체 통화 요약
               Text(
-                '오늘의 대화 요약',
+                '오늘의 통화 요약',
                 style: GoogleFonts.notoSerifKr(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -783,7 +822,7 @@ class _ElderlyDetailScreenState extends State<ElderlyDetailScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '시간별 대화 기록',
+                    '시간별 통화 기록',
                     style: GoogleFonts.notoSerifKr(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -926,6 +965,65 @@ class _ElderlyDetailScreenState extends State<ElderlyDetailScreen> {
     );
   }
 
+  Widget _buildStatsGrid({
+    required String depressionIndex,
+    required String depressionStatus,
+    required String healthStatus,
+    required String healthDetail,
+    required String callCount,
+    required String callStatus,
+    required String chatCount,
+    required String chatStatus,
+  }) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _buildStatCard(
+                title: '우울 수치',
+                value: depressionIndex,
+                subtitle: depressionStatus,
+                color: const Color(0xFF4CAF50),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildStatCard(
+                title: '건강상태',
+                value: healthStatus,
+                subtitle: healthDetail,
+                color: const Color(0xFF4CAF50),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _buildStatCard(
+                title: '전화 횟수',
+                value: callCount,
+                subtitle: callStatus,
+                color: eAccent,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildStatCard(
+                title: '채팅 횟수',
+                value: chatCount,
+                subtitle: chatStatus,
+                color: const Color(0xFF2196F3),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   Widget _buildStatCard({
     required String title,
     required String value,
@@ -938,7 +1036,7 @@ class _ElderlyDetailScreenState extends State<ElderlyDetailScreen> {
         border: Border.all(color: eLine),
         borderRadius: BorderRadius.circular(12),
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

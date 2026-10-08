@@ -93,7 +93,9 @@ class _GuardianScreenState extends State<GuardianScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
       backgroundColor: eBg,
       body: SafeArea(
         child: SingleChildScrollView(
@@ -282,6 +284,7 @@ class _GuardianScreenState extends State<GuardianScreen> {
             ),
           ),
         ),
+      ),
       ),
     );
   }
