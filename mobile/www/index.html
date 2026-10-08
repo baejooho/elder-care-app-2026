@@ -1,0 +1,621 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval';">
+    <title>안심케어</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* =====================================================
+           디자인 토큰 — 연 핑크 파스텔 그라디언트
+           ===================================================== */
+        :root {
+          --pink-1:     #FFF0F8;   /* 가장 연한 배경 */
+          --pink-2:     #FFE4F3;
+          --pink-3:     #FFC6E3;   /* 포인트 밝은 핑크 */
+          --primary:    #F472B6;   /* 메인 핑크 */
+          --primary-deep:#E055A0;
+          --primary-light:#FFF0F8;
+          --danger:     #FF8A8A;
+          --surface:    rgba(255,255,255,0.85);
+          --surface-solid: #FFFFFF;
+          --bg:         linear-gradient(145deg, #FFF5FB 0%, #FFE8F4 50%, #F5E8FF 100%);
+          --text:       #1A1A2E;
+          --text-sub:   #5A4E6A;
+          --text-muted: #A38FAF;
+          --border:     rgba(244,114,182,0.18);
+          --shadow-soft: 0 4px 24px rgba(244,114,182,.12);
+          --shadow-card: 0 8px 32px rgba(244,114,182,.10);
+          --r-card:     20px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+          font-family: 'Noto Sans KR', sans-serif;
+          background: var(--bg);
+          min-height: 100vh;
+          color: var(--text);
+          overflow-x: hidden;
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        button { cursor: pointer; font-family: inherit; border: none; background: none; transition: transform .15s, opacity .15s; }
+        button:active { transform: scale(.96); opacity: .88; }
+
+        /* =====================================================
+           화면 전환
+           ===================================================== */
+        .screen { display: none; }
+        .screen.active {
+          display: flex;
+          flex-direction: column;
+          min-height: 100vh;
+          animation: fadeUp .3s ease;
+        }
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(12px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* =====================================================
+           공통
+           ===================================================== */
+        .container { width: 100%; max-width: 480px; margin: 0 auto; padding: 0 20px; }
+
+        .glass-card {
+          background: var(--surface);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border-radius: var(--r-card);
+          border: 1px solid var(--border);
+          box-shadow: var(--shadow-card);
+        }
+
+        .back-btn {
+          position: fixed; top: 20px; left: 20px;
+          width: 42px; height: 42px;
+          background: var(--surface-solid);
+          border-radius: 50%;
+          box-shadow: var(--shadow-soft);
+          font-size: 18px; color: var(--text);
+          display: flex; align-items: center; justify-content: center;
+          z-index: 100; border: 1px solid var(--border);
+        }
+
+        .chip {
+          display: inline-flex; align-items: center; gap: 6px;
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: 999px;
+          padding: 6px 14px;
+          font-size: 12px; font-weight: 700;
+          color: var(--primary);
+          box-shadow: var(--shadow-soft);
+        }
+
+        .section-label {
+          padding: 20px 0 10px;
+          font-size: 12px; font-weight: 700;
+          color: var(--text-muted);
+          letter-spacing: .06em; text-transform: uppercase;
+        }
+
+        /* =====================================================
+           메인 화면
+           ===================================================== */
+        .main-top {
+          padding: 56px 20px 0;
+          text-align: center;
+          display: flex; flex-direction: column; align-items: center; gap: 12px;
+        }
+
+        .time-block {
+          margin-top: 8px;
+        }
+        .time-big {
+          font-size: 64px; font-weight: 900;
+          color: var(--text);
+          letter-spacing: -1px; line-height: 1;
+        }
+        .date-text {
+          font-size: 15px; color: var(--text-sub);
+          margin-top: 6px; font-weight: 500;
+        }
+
+        /* 메인 통화 카드 — 글라스 카드로 통일 */
+        .call-card {
+          margin: 28px 20px 0;
+          padding: 28px 24px;
+          display: flex; flex-direction: column; align-items: center; gap: 14px;
+          cursor: pointer;
+          position: relative; overflow: hidden;
+        }
+        /* 상단 포인트 라인만 그라디언트 */
+        .call-card::before {
+          content: '';
+          position: absolute; top: 0; left: 0; right: 0;
+          height: 3px;
+          background: linear-gradient(90deg, #F472B6, #D475F0);
+          border-radius: 20px 20px 0 0;
+        }
+        .call-card__icon {
+          width: 72px; height: 72px;
+          background: linear-gradient(135deg, #FFCCE8, #E8C6FF);
+          border-radius: 50%;
+          display: flex; align-items: center; justify-content: center;
+          position: relative;
+        }
+        .call-card__icon svg { width: 32px; height: 32px; }
+        .call-card__icon::after {
+          content: '';
+          position: absolute; inset: -6px;
+          border-radius: 50%;
+          border: 2px solid rgba(244,114,182,.25);
+          animation: pulse 2.2s infinite;
+        }
+        @keyframes pulse {
+          0%   { transform: scale(1);    opacity: .8; }
+          100% { transform: scale(1.3);  opacity: 0; }
+        }
+        .call-card__title { font-size: 20px; font-weight: 700; color: var(--text); }
+        .call-card__sub   { font-size: 13px; color: var(--text-muted); }
+
+        /* 메뉴 그리드 */
+        .menu-grid {
+          display: grid; grid-template-columns: 1fr 1fr;
+          gap: 14px; padding: 20px;
+        }
+        .menu-card {
+          padding: 22px 16px;
+          display: flex; flex-direction: column; align-items: center; gap: 10px;
+          cursor: pointer;
+        }
+        .menu-card__icon {
+          width: 52px; height: 52px;
+          border-radius: 15px;
+          display: flex; align-items: center; justify-content: center;
+          background: linear-gradient(135deg, var(--pink-1), var(--pink-2));
+        }
+        .menu-card__icon.sos { background: linear-gradient(135deg, #FFE8E8, #FFD0D0); }
+        .menu-card__icon svg { width: 24px; height: 24px; }
+        .menu-card__label { font-size: 15px; font-weight: 700; color: var(--text); }
+
+        /* =====================================================
+           채팅 화면
+           ===================================================== */
+        .chat-header {
+          background: var(--surface-solid);
+          padding: 56px 20px 16px;
+          text-align: center;
+          border-bottom: 1px solid var(--border);
+        }
+        .chat-header h2 { font-size: 17px; font-weight: 700; color: var(--text); }
+
+        .chat-messages {
+          flex: 1; overflow-y: auto;
+          padding: 20px;
+          display: flex; flex-direction: column; gap: 10px;
+          background: var(--bg);
+        }
+
+        .bubble-row { display: flex; }
+        .bubble-row.user { justify-content: flex-end; }
+        .bubble-row.ai   { justify-content: flex-start; }
+
+        .bubble {
+          max-width: 75%; padding: 12px 16px;
+          border-radius: 18px; font-size: 15px;
+          line-height: 1.55; word-break: break-word;
+        }
+        .bubble.user {
+          background: linear-gradient(135deg, #F472B6, #D475F0);
+          color: white; border-bottom-right-radius: 4px;
+        }
+        .bubble.ai {
+          background: var(--surface-solid); color: var(--text);
+          border: 1px solid var(--border); border-bottom-left-radius: 4px;
+          box-shadow: var(--shadow-soft);
+        }
+        .bubble.error {
+          background: #FEF2F2; color: var(--danger);
+          border: 1px solid #FECACA; border-bottom-left-radius: 4px;
+        }
+
+        .chat-input-bar {
+          background: var(--surface-solid);
+          border-top: 1px solid var(--border);
+          padding: 12px 16px;
+          display: flex; gap: 10px; align-items: center;
+        }
+        .chat-input-bar input {
+          flex: 1; padding: 12px 16px;
+          background: var(--pink-1);
+          border: 1.5px solid var(--border);
+          border-radius: 999px;
+          font-size: 15px; font-family: inherit; color: var(--text);
+          outline: none; transition: border-color .2s;
+        }
+        .chat-input-bar input:focus { border-color: var(--primary); }
+        .send-btn {
+          padding: 12px 20px;
+          background: linear-gradient(135deg, #F472B6, #D475F0);
+          color: white; border-radius: 999px;
+          font-size: 15px; font-weight: 700; white-space: nowrap;
+          box-shadow: 0 4px 14px rgba(244,114,182,.35);
+        }
+
+        /* =====================================================
+           통화 내역
+           ===================================================== */
+        .sub-header {
+          padding: 60px 20px 16px;
+          font-size: 22px; font-weight: 700; color: var(--text);
+        }
+
+        .history-list { padding: 0 20px 20px; display: flex; flex-direction: column; gap: 10px; }
+        .history-item {
+          padding: 16px;
+          display: flex; align-items: center; gap: 14px;
+        }
+        .history-avatar {
+          width: 46px; height: 46px;
+          border-radius: 14px;
+          background: linear-gradient(135deg, var(--pink-1), var(--pink-2));
+          display: flex; align-items: center; justify-content: center;
+          font-size: 22px; flex-shrink: 0;
+        }
+        .history-info { flex: 1; }
+        .history-name { font-size: 15px; font-weight: 700; margin-bottom: 3px; color: var(--text); }
+        .history-time { font-size: 12px; color: var(--text-muted); }
+        .history-dur  { font-size: 14px; font-weight: 700; color: var(--primary); }
+
+        /* =====================================================
+           비상 연락
+           ===================================================== */
+        .emergency-list { padding: 0 20px 20px; display: flex; flex-direction: column; gap: 10px; }
+
+        .sos-btn {
+          width: 100%; padding: 20px 24px;
+          background: linear-gradient(135deg, #FF8A8A, #FF6B8A);
+          color: white; border-radius: 18px;
+          font-size: 19px; font-weight: 700;
+          display: flex; justify-content: space-between; align-items: center;
+          box-shadow: 0 6px 20px rgba(255,107,107,.25);
+        }
+
+        .contact-item {
+          padding: 15px 20px;
+          display: flex; align-items: center; justify-content: space-between;
+          cursor: pointer;
+        }
+        .contact-item__left { display: flex; align-items: center; gap: 12px; }
+        .contact-icon {
+          width: 42px; height: 42px;
+          background: linear-gradient(135deg, var(--pink-1), var(--pink-2));
+          border-radius: 12px;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 20px;
+        }
+        .contact-name  { font-size: 16px; font-weight: 600; color: var(--text); }
+        .contact-arrow { font-size: 16px; color: var(--text-muted); }
+
+        /* =====================================================
+           통화 중 화면
+           ===================================================== */
+        #callingScreen.active {
+          background: linear-gradient(145deg, #FF8FCC 0%, #D475F0 100%);
+          align-items: center; justify-content: center; gap: 0;
+        }
+
+        .calling-avatar {
+          width: 150px; height: 150px;
+          background: rgba(255,255,255,.22);
+          border-radius: 50%;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 76px; margin-bottom: 30px; position: relative;
+        }
+        .calling-avatar::after {
+          content: ''; position: absolute; inset: -10px;
+          border-radius: 50%;
+          border: 2.5px solid rgba(255,255,255,.35);
+          animation: ripple 2s infinite;
+        }
+        @keyframes ripple {
+          0%   { transform: scale(1);   opacity: 1; }
+          100% { transform: scale(1.3); opacity: 0; }
+        }
+        .calling-name  { font-size: 34px; font-weight: 700; color: white; margin-bottom: 8px; }
+        .calling-timer { font-size: 22px; color: rgba(255,255,255,.82); margin-bottom: 60px; }
+
+        .hangup-btn {
+          width: 112px; height: 112px;
+          background: white; border-radius: 50%;
+          display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+          box-shadow: 0 12px 32px rgba(0,0,0,.15); margin-bottom: 14px;
+        }
+        .hangup-btn .icon  { font-size: 38px; }
+        .hangup-btn .label { font-size: 13px; font-weight: 700; color: var(--danger); }
+
+        .calling-note {
+          font-size: 13px; color: rgba(255,255,255,.65);
+          text-align: center; line-height: 1.7; margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ==================== 메인 화면 ==================== -->
+<div id="mainScreen" class="screen active">
+    <div class="container">
+        <div class="main-top">
+      <span class="chip">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" fill="#F472B6"/></svg>
+        AI 친구 · 안심케어
+      </span>
+            <div class="time-block">
+                <div class="time-big" id="currentTime">--:--</div>
+                <div class="date-text" id="currentDate">-</div>
+            </div>
+        </div>
+
+        <div class="glass-card call-card" onclick="startCall('AI 친구','')">
+            <div class="call-card__icon">
+                <!-- 전화 수화기 -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="#D475F0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.41 11a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.32 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16.92z"/>
+                </svg>
+            </div>
+            <div class="call-card__title">AI 친구와 대화하기</div>
+            <div class="call-card__sub">언제든 편하게 연락하세요</div>
+        </div>
+
+        <div class="menu-grid">
+            <div class="glass-card menu-card" onclick="showScreen('chatScreen')">
+                <div class="menu-card__icon">
+                    <!-- 메시지 버블 -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#F472B6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </div>
+                <div class="menu-card__label">AI 채팅</div>
+            </div>
+            <div class="glass-card menu-card" onclick="showScreen('emergencyScreen')">
+                <div class="menu-card__icon sos">
+                    <!-- 경고 벨 -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#FF8A8A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                </div>
+                <div class="menu-card__label">비상 연락</div>
+            </div>
+        </div>
+
+        <div class="menu-grid">
+            <div class="glass-card menu-card" onclick="showScreen('chatScreen')">
+                <div class="menu-card__icon">
+                    <!-- 메시지 버블 -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#F472B6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </div>
+                <div class="menu-card__label">AI 채팅</div>
+            </div>
+            <div class="glass-card menu-card" onclick="showScreen('emergencyScreen')">
+                <div class="menu-card__icon sos">
+                    <!-- 경고 벨 -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#FF8A8A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                </div>
+                <div class="menu-card__label">비상 연락</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 채팅 화면 ==================== -->
+<div id="chatScreen" class="screen">
+    <button class="back-btn" onclick="showScreen('mainScreen')">←</button>
+    <div class="chat-header"><h2>🤖 AI 친구와 채팅</h2></div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input-bar">
+        <input type="text" id="chatInput" placeholder="메시지를 입력하세요...">
+        <button class="send-btn" onclick="sendMessage()">전송</button>
+    </div>
+</div>
+
+<!-- ==================== 통화 내역 화면 ==================== -->
+<div id="historyScreen" class="screen">
+    <button class="back-btn" onclick="showScreen('mainScreen')">←</button>
+    <div class="container">
+        <div class="sub-header">통화 기록</div>
+        <div class="history-list">
+            <div class="glass-card history-item">
+                <div class="history-avatar">🤖</div>
+                <div class="history-info"><div class="history-name">AI 친구</div><div class="history-time">오늘 오후 2:30</div></div>
+                <div class="history-dur">15분</div>
+            </div>
+            <div class="glass-card history-item">
+                <div class="history-avatar">👨</div>
+                <div class="history-info"><div class="history-name">큰아들</div><div class="history-time">어제 오후 7:15</div></div>
+                <div class="history-dur">8분</div>
+            </div>
+            <div class="glass-card history-item">
+                <div class="history-avatar">🤖</div>
+                <div class="history-info"><div class="history-name">AI 친구</div><div class="history-time">어제 오전 10:00</div></div>
+                <div class="history-dur">23분</div>
+            </div>
+            <div class="glass-card history-item">
+                <div class="history-avatar">👩</div>
+                <div class="history-info"><div class="history-name">딸</div><div class="history-time">3일 전</div></div>
+                <div class="history-dur">12분</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 비상 연락 화면 ==================== -->
+<div id="emergencyScreen" class="screen">
+    <button class="back-btn" onclick="showScreen('mainScreen')">←</button>
+    <div class="container">
+        <div class="sub-header">비상 연락</div>
+        <div class="emergency-list">
+            <button class="sos-btn" onclick="emergencyCall('119')">
+        <span style="display:flex;align-items:center;gap:10px;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.41 11a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.32 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16.92z"/></svg>
+          119 응급전화
+        </span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+
+            <div class="section-label">가족</div>
+            <div class="glass-card contact-item" onclick="startCall('큰아들','👨')">
+                <div class="contact-item__left"><div class="contact-icon">👨</div><span class="contact-name">큰아들</span></div>
+                <span class="contact-arrow">📞</span>
+            </div>
+            <div class="glass-card contact-item" onclick="startCall('딸','👩')">
+                <div class="contact-item__left"><div class="contact-icon">👩</div><span class="contact-name">딸</span></div>
+                <span class="contact-arrow">📞</span>
+            </div>
+            <div class="glass-card contact-item" onclick="startCall('며느리','👰')">
+                <div class="contact-item__left"><div class="contact-icon">👰</div><span class="contact-name">며느리</span></div>
+                <span class="contact-arrow">📞</span>
+            </div>
+
+            <div class="section-label">기타</div>
+            <div class="glass-card contact-item" onclick="startCall('복지관','🏥')">
+                <div class="contact-item__left"><div class="contact-icon">🏥</div><span class="contact-name">복지관</span></div>
+                <span class="contact-arrow">📞</span>
+            </div>
+            <div class="glass-card contact-item" onclick="startCall('요양보호사','👨‍⚕️')">
+                <div class="contact-item__left"><div class="contact-icon">👨‍⚕️</div><span class="contact-name">요양보호사</span></div>
+                <span class="contact-arrow">📞</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 통화 중 화면 ==================== -->
+<div id="callingScreen" class="screen">
+    <div class="calling-avatar" id="callerAvatar">🤖</div>
+    <div class="calling-name"  id="callerName">AI 친구</div>
+    <div class="calling-timer" id="callTimer">00:00</div>
+    <button class="hangup-btn" onclick="endCall()">
+        <span class="icon">📴</span>
+        <span class="label">종료</span>
+    </button>
+    <p class="calling-note">통화 내용이 자동으로 녹음되며<br>분석 결과는 보호자에게 전송됩니다</p>
+</div>
+
+<script>
+    /* 시계 */
+    function updateTime() {
+      const now  = new Date();
+      const hh   = String(now.getHours()).padStart(2,'0');
+      const mm   = String(now.getMinutes()).padStart(2,'0');
+      const days = ['일','월','화','수','목','금','토'];
+      document.getElementById('currentTime').textContent = `${hh}:${mm}`;
+      document.getElementById('currentDate').textContent =
+        `${now.getMonth()+1}월 ${now.getDate()}일 ${days[now.getDay()]}요일`;
+    }
+    setInterval(updateTime, 1000);
+    updateTime();
+
+    /* 화면 전환 */
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    /* 통화 */
+    let _callTimer = null, _callStart = 0;
+
+    function startCall(name, avatar) {
+      document.getElementById('callerName').textContent   = name;
+      document.getElementById('callerAvatar').textContent = avatar;
+      document.getElementById('callTimer').textContent    = '00:00';
+      showScreen('callingScreen');
+      _callStart = Date.now();
+      _callTimer = setInterval(() => {
+        const s  = Math.floor((Date.now() - _callStart) / 1000);
+        const mm = String(Math.floor(s / 60)).padStart(2,'0');
+        const ss = String(s % 60).padStart(2,'0');
+        document.getElementById('callTimer').textContent = `${mm}:${ss}`;
+      }, 1000);
+    }
+
+    function endCall() {
+      clearInterval(_callTimer);
+      const duration = Math.floor((Date.now() - _callStart) / 1000);
+      const name     = document.getElementById('callerName').textContent;
+      fetch('http://10.0.2.2:8080/api/call-history', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ callerName: name, callerType: name === 'AI 친구' ? 'AI' : 'FAMILY', duration, status: 'COMPLETED' })
+      }).catch(() => {});
+      alert('통화가 종료되었습니다.\n녹음 파일과 분석 리포트가\n보호자에게 전송됩니다.');
+      showScreen('mainScreen');
+    }
+
+    function emergencyCall(number) {
+      if (confirm(`${number}에 전화를 거시겠습니까?`)) alert('긴급 전화 연결 중...');
+    }
+
+    /* 채팅 — 한글 IME 버그 수정 */
+    let _isComposing = false;
+    const _input = document.getElementById('chatInput');
+    _input.addEventListener('compositionstart', () => _isComposing = true);
+    _input.addEventListener('compositionend',   () => _isComposing = false);
+    _input.addEventListener('keydown', e => { if (e.key === 'Enter' && !_isComposing) sendMessage(); });
+
+    function addBubble(text, type) {
+      const row    = document.createElement('div');
+      row.className = `bubble-row ${type}`;
+      const bubble = document.createElement('div');
+      bubble.className = `bubble ${type}`;
+      bubble.textContent = text;
+      row.appendChild(bubble);
+      const c = document.getElementById('chatMessages');
+      c.appendChild(row);
+      c.scrollTop = c.scrollHeight;
+    }
+
+    function sendMessage() {
+      const msg = _input.value.trim();
+      if (!msg) return;
+      addBubble(msg, 'user');
+      _input.value = '';
+      fetch('http://10.0.2.2:8080/api/conversation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg })
+      })
+      .then(r => r.json())
+      .then(data => addBubble(data.response ?? 'AI 응답을 처리할 수 없습니다.', 'ai'))
+      .catch(err  => addBubble(`연결 오류: ${err.message}`, 'error'));
+    }
+
+    /* Cordova — FCM 토큰 */
+    document.addEventListener('deviceready', () => {
+      if (!window.cordova?.exec) return;
+      cordova.exec(
+        token => {
+          if (!token) return;
+          fetch('http://10.0.2.2:8080/api/fcm/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token })
+          }).catch(() => {});
+        },
+        err => console.error('FCM 토큰 오류:', err),
+        'FirebaseMessaging', 'getToken', ['']
+      );
+    }, false);
+</script>
+<script src="cordova.js"></script>
+</body>
+</html>

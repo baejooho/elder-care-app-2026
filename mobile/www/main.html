@@ -1,0 +1,932 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta http-equiv="Content-Security-Policy" content="default-src *; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data:">
+    <title>안심케어</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* 메인 컨테이너 */
+        .main-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* 헤더 */
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding-top: 20px;
+        }
+
+        .app-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+            border-radius: 24px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 45px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .time-display {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .time {
+            font-size: 56px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .date {
+            font-size: 22px;
+            opacity: 0.95;
+            font-weight: 500;
+            margin-top: 8px;
+        }
+
+        /* 메인 통화 카드 */
+        .main-call-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 30px;
+            padding: 40px 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-call-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(102,126,234,0.1) 0%, rgba(118,75,162,0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .main-call-card:active::before {
+            opacity: 1;
+        }
+
+        .main-call-card:active {
+            transform: scale(0.97);
+        }
+
+        .call-card-icon {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            box-shadow: 0 10px 30px rgba(102,126,234,0.4);
+            position: relative;
+        }
+
+        .call-card-icon::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 3px solid rgba(102,126,234,0.5);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.3);
+                opacity: 0;
+            }
+        }
+
+        .call-card-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .call-card-subtitle {
+            font-size: 16px;
+            color: #7f8c8d;
+            text-align: center;
+        }
+
+        /* 메뉴 그리드 */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .menu-card {
+            background: white;
+            border-radius: 24px;
+            padding: 30px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(135deg, transparent 0%, rgba(102,126,234,0.1) 50%, transparent 100%);
+            transform: rotate(45deg);
+            transition: all 0.5s;
+        }
+
+        .menu-card:active::before {
+            left: 100%;
+        }
+
+        .menu-card:active {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+        }
+
+        .menu-icon-wrapper {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #f0f3ff 0%, #e8eaf6 100%);
+            border-radius: 20px;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 38px;
+        }
+
+        .menu-card-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2c3e50;
+            text-align: center;
+        }
+
+        /* 비상 연락 섹션 */
+        .emergency-section {
+            background: white;
+            border-radius: 24px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .section-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .emergency-btn {
+            width: 100%;
+            height: 75px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            border: none;
+            border-radius: 18px;
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 25px;
+            box-shadow: 0 8px 20px rgba(255,107,107,0.3);
+            transition: all 0.3s;
+        }
+
+        .emergency-btn:active {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px rgba(255,107,107,0.4);
+        }
+
+        .contact-group {
+            margin-top: 25px;
+        }
+
+        .contact-btn {
+            width: 100%;
+            height: 65px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border: 2px solid #e9ecef;
+            border-radius: 16px;
+            color: #2c3e50;
+            font-size: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            transition: all 0.3s;
+        }
+
+        .contact-btn:active {
+            transform: translateY(-2px);
+            border-color: #667eea;
+            background: linear-gradient(135deg, #f0f3ff 0%, #ffffff 100%);
+        }
+
+        .contact-icon {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        /* 통화 내역 */
+        .history-card {
+            background: white;
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+        }
+
+        .history-card:active {
+            transform: translateX(5px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+        }
+
+        .history-avatar {
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+
+        .history-content {
+            flex: 1;
+        }
+
+        .history-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+
+        .history-time {
+            font-size: 15px;
+            color: #95a5a6;
+        }
+
+        .history-duration {
+            font-size: 18px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        /* 통화 중 화면 */
+        .calling-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .caller-profile {
+            width: 180px;
+            height: 180px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 50%;
+            margin-bottom: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 90px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .caller-profile::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 4px solid rgba(255,255,255,0.5);
+            animation: ripple 2s infinite;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.4);
+                opacity: 0;
+            }
+        }
+
+        .caller-info {
+            color: white;
+            margin-bottom: 50px;
+        }
+
+        .caller-name-big {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .call-timer-big {
+            font-size: 32px;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        .hangup-btn-new {
+            width: 140px;
+            height: 140px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 15px 40px rgba(255,107,107,0.4);
+            transition: all 0.3s;
+            margin-bottom: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .hangup-btn-new:active {
+            transform: scale(0.9);
+        }
+
+        .hangup-icon {
+            font-size: 50px;
+        }
+
+        .hangup-text {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .call-info-text {
+            color: rgba(255,255,255,0.8);
+            font-size: 15px;
+            line-height: 1.8;
+        }
+
+        /* 뒤로가기 버튼 */
+        .back-btn {
+            position: fixed;
+            top: 25px;
+            left: 25px;
+            width: 55px;
+            height: 55px;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border: none;
+            border-radius: 50%;
+            font-size: 28px;
+            color: #2c3e50;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+
+        .back-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* 화면 전환 */
+        .screen {
+            display: none;
+            animation: fadeIn 0.4s;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 로딩 버튼 */
+        .load-btn {
+            width: 100%;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 16px;
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 8px 20px rgba(102,126,234,0.3);
+            transition: all 0.3s;
+        }
+
+        .load-btn:active {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px rgba(102,126,234,0.4);
+        }
+    </style>
+</head>
+<body>
+<!-- 메인 화면 -->
+<div id="mainScreen" class="screen active">
+    <div class="main-container">
+        <div class="header">
+            <div class="app-logo">🏠</div>
+            <div class="time-display">
+                <div class="time" id="currentTime">--:--</div>
+                <div class="date" id="currentDate">-</div>
+            </div>
+        </div>
+
+        <!-- 메인 통화 카드 -->
+        <div class="main-call-card" onclick="startCall('AI 친구', '🤖')">
+            <div class="call-card-icon">📞</div>
+            <div class="call-card-title">AI 친구와 대화하기</div>
+            <div class="call-card-subtitle">언제든 편하게 연락하세요</div>
+        </div>
+
+        <!-- 메뉴 그리드 -->
+        <div class="menu-grid">
+            <div class="menu-card" onclick="showCallHistory()">
+                <div class="menu-icon-wrapper">📋</div>
+                <div class="menu-card-title">통화 기록</div>
+            </div>
+
+            <div class="menu-card" onclick="showEmergency()">
+                <div class="menu-icon-wrapper">🆘</div>
+                <div class="menu-card-title">비상 연락</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 비상 연락 화면 -->
+<div id="emergencyScreen" class="screen">
+    <button class="back-btn" onclick="showMain()">←</button>
+    <div class="main-container" style="padding-top: 90px;">
+        <div class="emergency-section">
+            <div class="section-header">
+                <div class="section-icon">🚨</div>
+                <div class="section-title">긴급 연락</div>
+            </div>
+
+            <button class="emergency-btn" onclick="emergencyCall('119')">
+                <span>🚑 119 응급전화</span>
+                <span style="font-size: 30px;">☎️</span>
+            </button>
+
+            <div class="contact-group">
+                <div class="section-header" style="margin-bottom: 15px;">
+                    <div class="section-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">👨‍👩‍👧</div>
+                    <div class="section-title">가족</div>
+                </div>
+
+                <button class="contact-btn" onclick="startCall('큰아들', '👨')">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="contact-icon">👨</div>
+                        <span>큰아들</span>
+                    </div>
+                    <span style="font-size: 24px;">📞</span>
+                </button>
+
+                <button class="contact-btn" onclick="startCall('딸', '👩')">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="contact-icon">👩</div>
+                        <span>딸</span>
+                    </div>
+                    <span style="font-size: 24px;">📞</span>
+                </button>
+
+                <button class="contact-btn" onclick="startCall('며느리', '👰')">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="contact-icon">👰</div>
+                        <span>며느리</span>
+                    </div>
+                    <span style="font-size: 24px;">📞</span>
+                </button>
+            </div>
+
+            <div class="contact-group">
+                <div class="section-header" style="margin-bottom: 15px;">
+                    <div class="section-icon" style="background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);">🏥</div>
+                    <div class="section-title">기타</div>
+                </div>
+
+                <button class="contact-btn" onclick="startCall('복지관', '🏥')">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="contact-icon" style="background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);">🏥</div>
+                        <span>복지관</span>
+                    </div>
+                    <span style="font-size: 24px;">📞</span>
+                </button>
+
+                <button class="contact-btn" onclick="startCall('요양보호사', '👨‍⚕️')">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="contact-icon" style="background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);">👨‍⚕️</div>
+                        <span>요양보호사</span>
+                    </div>
+                    <span style="font-size: 24px;">📞</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 통화 내역 화면 -->
+<div id="historyScreen" class="screen">
+    <button class="back-btn" onclick="showMain()">←</button>
+    <div class="main-container" style="padding-top: 90px;">
+        <div class="emergency-section">
+            <div class="section-header">
+                <div class="section-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">📋</div>
+                <div class="section-title">최근 통화</div>
+            </div>
+
+            <div class="history-card">
+                <div class="history-avatar">🤖</div>
+                <div class="history-content">
+                    <div class="history-name">AI 친구</div>
+                    <div class="history-time">오늘 오후 2:30</div>
+                </div>
+                <div class="history-duration">15분</div>
+            </div>
+
+            <div class="history-card">
+                <div class="history-avatar">👨</div>
+                <div class="history-content">
+                    <div class="history-name">큰아들</div>
+                    <div class="history-time">어제 오후 7:15</div>
+                </div>
+                <div class="history-duration">8분</div>
+            </div>
+
+            <div class="history-card">
+                <div class="history-avatar">🤖</div>
+                <div class="history-content">
+                    <div class="history-name">AI 친구</div>
+                    <div class="history-time">어제 오전 10:00</div>
+                </div>
+                <div class="history-duration">23분</div>
+            </div>
+
+            <div class="history-card">
+                <div class="history-avatar">👩</div>
+                <div class="history-content">
+                    <div class="history-name">딸</div>
+                    <div class="history-time">3일 전</div>
+                </div>
+                <div class="history-duration">12분</div>
+            </div>
+
+            <div class="history-card">
+                <div class="history-avatar">🤖</div>
+                <div class="history-content">
+                    <div class="history-name">AI 친구</div>
+                    <div class="history-time">3일 전</div>
+                </div>
+                <div class="history-duration">18분</div>
+            </div>
+
+            <button class="load-btn" onclick="loadCallHistory()">
+                🔄 전체 내역 불러오기
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 통화 중 화면 -->
+<div id="callingScreen" class="screen">
+    <div class="calling-container">
+        <div class="caller-profile" id="callerAvatar">👵</div>
+        <div class="caller-info">
+            <div class="caller-name-big" id="callerName">AI 친구</div>
+            <div class="call-timer-big" id="callTimer">00:00</div>
+        </div>
+
+        <button class="hangup-btn-new" onclick="endCall()">
+            <div class="hangup-icon">📴</div>
+            <div class="hangup-text">통화 종료</div>
+        </button>
+
+        <div class="call-info-text">
+            통화 내용이 자동으로 녹음되며<br>
+            분석 결과는 보호자에게 전송됩니다
+        </div>
+    </div>
+</div>
+
+<script>
+    // 시계 업데이트
+    function updateTime() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('currentTime').textContent = hours + ':' + minutes;
+
+        const days = ['일', '월', '화', '수', '목', '금', '토'];
+        const month = now.getMonth() + 1;
+        const date = now.getDate();
+        const day = days[now.getDay()];
+        document.getElementById('currentDate').textContent =
+            `${month}월 ${date}일 ${day}요일`;
+    }
+
+    setInterval(updateTime, 1000);
+    updateTime();
+
+    // 화면 전환
+    function showMain() {
+        hideAllScreens();
+        document.getElementById('mainScreen').classList.add('active');
+    }
+
+    function showEmergency() {
+        hideAllScreens();
+        document.getElementById('emergencyScreen').classList.add('active');
+    }
+
+    function showCallHistory() {
+        hideAllScreens();
+        document.getElementById('historyScreen').classList.add('active');
+    }
+
+    function hideAllScreens() {
+        const screens = document.getElementsByClassName('screen');
+        for (let screen of screens) {
+            screen.classList.remove('active');
+        }
+    }
+
+    // 통화 관련
+    let callStartTime;
+    let callTimerInterval;
+
+    function startCall(name, avatar) {
+        hideAllScreens();
+        document.getElementById('callingScreen').classList.add('active');
+        document.getElementById('callerName').textContent = name;
+        document.getElementById('callerAvatar').textContent = avatar;
+
+        // 타이머 시작
+        callStartTime = Date.now();
+        callTimerInterval = setInterval(updateCallTimer, 1000);
+
+        console.log('📹 통화 녹음 시작:', name);
+    }
+
+    function updateCallTimer() {
+        const elapsed = Math.floor((Date.now() - callStartTime) / 1000);
+        const minutes = Math.floor(elapsed / 60);
+        const seconds = elapsed % 60;
+        document.getElementById('callTimer').textContent =
+            String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+    }
+
+    function endCall() {
+        clearInterval(callTimerInterval);
+
+        const duration = Math.floor((Date.now() - callStartTime) / 1000);
+        const callerNameNow = document.getElementById('callerName').textContent;
+
+        fetch('https://10.0.2.2:8080/api/call-history', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                callerName: callerNameNow,
+                callerType: callerNameNow === 'AI 친구' ? 'AI' : 'FAMILY',
+                duration: duration,
+                status: 'COMPLETED'
+            })
+        })
+        .then(r => r.json())
+        .then(data => console.log('통화 저장 완료:', data))
+        .catch(err => console.log('저장 실패:', err));
+
+        alert('통화가 종료되었습니다.\n녹음 파일과 분석 리포트가\n보호자에게 전송됩니다.');
+        showMain();
+    }
+
+    function emergencyCall(number) {
+        if (confirm(number + '에 전화를 거시겠습니까?')) {
+            alert('긴급 전화 연결 중...\n(실제 구현은 Phase 2-3에서)');
+        }
+    }
+
+    function loadCallHistory() {
+        fetch('https://10.0.2.2:8080/api/call-history/recent')
+            .then(r => r.json())
+            .then(data => {
+                const list = document.getElementById('historyList');
+                list.innerHTML = '';
+                data.forEach(call => {
+                    const minutes = Math.floor(call.duration / 60);
+                    const timeStr = new Date(call.callTime).toLocaleString('ko-KR');
+                    const avatars = {'AI': '🤖', 'FAMILY': '👨', 'EMERGENCY': '🚑'};
+                    const avatar = avatars[call.callerType] || '📞';
+
+                    list.innerHTML += `
+                        <div class="history-card">
+                            <div class="history-avatar">${avatar}</div>
+                            <div class="history-content">
+                                <div class="history-name">${call.callerName}</div>
+                                <div class="history-time">${timeStr}</div>
+                            </div>
+                            <div class="history-duration">${minutes}분</div>
+                        </div>`;
+                });
+            })
+            .catch(err => alert('서버 연결 실패!'));
+    }
+</script>
+<!-- Cordova JS 로더 -->
+<script type="text/javascript" src="cordova.js"></script>
+
+<!-- FCM 토큰 등록 -->
+<script>
+    document.addEventListener('deviceready', function() {
+        console.log('📱 deviceready 발생!');
+        alert('✅ deviceready 발생!');
+
+        setTimeout(function() {
+            console.log('🔍 getToken 호출 시작');
+
+
+            if (!window.cordova || !window.cordova.exec) {
+                alert('❌ Cordova exec가 없습니다');
+                return;
+            }
+
+            // FirebaseMessaging.getToken(String type, ...) 호출
+            cordova.exec(
+                function(token) {
+                    console.log('✅ Token 획득:', token);
+                    if (token) {
+                        alert('✅ FCM Token 획득!\n' + token.substring(0, 50) + '...');
+
+                        // 서버에 토큰 전송
+                        const xhr = new XMLHttpRequest();
+                        //xhr.open("POST", "http://10.0.2.2:8080/api/fcm/register", false);
+                        xhr.open("GET", "http://10.0.2.2:8080/api/hello", false);
+                        xhr.setRequestHeader("Content-Type", "application/json");
+                        try {
+                        xhr.send(JSON.stringify({ token: token }));
+                        } catch(e) {
+                        alert('error');
+                        alert(e);
+                        }
+
+                        alert('status: ' + xhr.status + ":" + xhr.responseText);
+
+                        /**
+                        fetch('https://192.168.225.94:8080/api/fcm/register', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ token: token })
+                        })
+                        .then(r => {
+                            console.log('서버 응답:', r.status, r.statusText);
+                            if (!r.ok) {
+                                throw new Error('HTTP ' + r.status);
+                            }
+                            return r.text();
+                        })
+                        .then(data => {
+                            console.log('✅ 응답 데이터:', data);
+                            alert('✅ 토큰이 서버에 등록되었습니다!');
+                        })
+                        .catch(err => {
+                            console.error('❌ 등록 실패:', err);
+                            alert('❌ 등록 실패22:\n' + err);
+                        });
+                        */
+                    } else {
+                        alert('❌ 토큰이 null');
+                    }
+                },
+                function(error) {
+                    console.error('❌ getToken 에러:', error);
+                    alert('❌ 오류: ' + error);
+                },
+                'FirebaseMessaging',
+                'getToken',
+                ['']  // ← 이것이 String type 인자!
+            );
+        }, 1500);
+
+    }, false);
+</script>
+
+</body>
+</html>

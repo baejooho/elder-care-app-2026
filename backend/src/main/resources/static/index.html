@@ -1,0 +1,77 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket 테스트</title>
+    <script src="/js/sockjs.min.js"></script>
+    <script src="/js/stomp.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; background: #f5f5f5; }
+        h1 { color: #667eea; text-align: center; }
+        #messages { border: 2px solid #667eea; border-radius: 10px; height: 400px; overflow-y: scroll; padding: 15px; margin-bottom: 20px; background: white; }
+        .message { padding: 8px 12px; margin: 5px 0; border-radius: 5px; background: #e3f2fd; }
+        .system { background: #fff3e0; font-weight: bold; }
+        input { width: 60%; padding: 12px; margin-right: 10px; border: 2px solid #667eea; border-radius: 5px; font-size: 16px; }
+        button { padding: 12px 24px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-right: 10px; }
+        #status { text-align: center; margin-bottom: 20px; padding: 10px; border-radius: 5px; }
+        .connected { background: #c8e6c9; color: #2e7d32; }
+        .disconnected { background: #ffcdd2; color: #c62828; }
+    </style>
+</head>
+<body>
+<h1>안심케어 WebSocket 테스트</h1>
+<div id="status" class="disconnected">연결 중...</div>
+<div id="messages"></div>
+<input type="text" id="messageInput" placeholder="메시지를 입력하세요">
+<button onclick="sendMessage()">전송</button>
+<button onclick="sendHello()">인사하기</button>
+
+<script>
+    var stompClient = null;
+
+    function connect() {
+        var socket = new WebSocket('ws://10.0.2.2:8080/ws');
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function (frame) {
+            document.getElementById('status').className = 'connected';
+            document.getElementById('status').textContent = '연결됨';
+            stompClient.subscribe('/topic/messages', function (message) {
+                showMessage(JSON.parse(message.body));
+            });
+        }, function(error) {
+            document.getElementById('status').className = 'disconnected';
+            document.getElementById('status').textContent = '연결 실패: ' + error;
+        });
+    }
+
+    function sendMessage() {
+        var content = document.getElementById('messageInput').value;
+        if (content.trim() === '') return;
+        stompClient.send("/app/chat.send", {}, JSON.stringify({'sender': '사용자', 'content': content, 'type': 'CHAT'}));
+        document.getElementById('messageInput').value = '';
+    }
+
+    function sendHello() {
+        stompClient.send("/app/chat.hello", {}, JSON.stringify({'sender': '테스터', 'content': '', 'type': 'HELLO'}));
+    }
+
+    function showMessage(message) {
+        var messagesDiv = document.getElementById('messages');
+        var messageElement = document.createElement('div');
+        messageElement.className = message.type === 'SYSTEM' ? 'message system' : 'message';
+        messageElement.textContent = message.sender + ': ' + message.content;
+        messagesDiv.appendChild(messageElement);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    document.getElementById('messageInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    connect();
+</script>
+</body>
+</html>
+
+
