@@ -4,12 +4,12 @@ import '../services/auth_service.dart';
 import 'role_selection_screen.dart';
 import 'elderly_management_screen.dart';
 
-const Color eBg = Color(0xFFFBF6ED);
-const Color eCard = Color(0xFFFFFDF8);
-const Color eInk = Color(0xFF3B2F26);
-const Color eInkSoft = Color(0xFF93816D);
-const Color eLine = Color(0xFFEADFC9);
-const Color eAccent = Color(0xFFD97B4F);
+const Color eBg = Color(0xFFEFF6FF);
+const Color eCard = Color(0xFFFFFFFF);
+const Color eInk = Color(0xFF0E2548);
+const Color eInkSoft = Color(0xFF3C5C8C);
+const Color eLine = Color(0xFFD6E4FF);
+const Color eAccent = Color(0xFF1A6BFF);
 
 class GuardianAccountScreen extends StatefulWidget {
   const GuardianAccountScreen({super.key});
@@ -115,7 +115,7 @@ class _GuardianAccountScreenState extends State<GuardianAccountScreen> {
         elevation: 0,
         title: Text(
           '계정 관리',
-          style: GoogleFonts.notoSerifKr(
+          style: GoogleFonts.notoSansKr(
             fontSize: 24,
             fontWeight: FontWeight.w700,
             color: eInk,
@@ -213,7 +213,7 @@ class _GuardianAccountScreenState extends State<GuardianAccountScreen> {
               // 기본 정보
               Text(
                 '기본 정보',
-                style: GoogleFonts.notoSerifKr(
+                style: GoogleFonts.notoSansKr(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: eInk,
@@ -236,7 +236,7 @@ class _GuardianAccountScreenState extends State<GuardianAccountScreen> {
               // 알림 설정
               Text(
                 '알림 설정',
-                style: GoogleFonts.notoSerifKr(
+                style: GoogleFonts.notoSansKr(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: eInk,
@@ -295,7 +295,7 @@ class _GuardianAccountScreenState extends State<GuardianAccountScreen> {
                 children: [
                   Text(
                     '관리 중인 어르신',
-                    style: GoogleFonts.notoSerifKr(
+                    style: GoogleFonts.notoSansKr(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                       color: eInk,
@@ -353,7 +353,7 @@ class _GuardianAccountScreenState extends State<GuardianAccountScreen> {
               // 계정 보안
               Text(
                 '계정 보안',
-                style: GoogleFonts.notoSerifKr(
+                style: GoogleFonts.notoSansKr(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: eInk,

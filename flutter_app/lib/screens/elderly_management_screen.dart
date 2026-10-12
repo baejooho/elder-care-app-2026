@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-const Color eBg = Color(0xFFFBF6ED);
-const Color eCard = Color(0xFFFFFDF8);
-const Color eInk = Color(0xFF3B2F26);
-const Color eInkSoft = Color(0xFF93816D);
-const Color eLine = Color(0xFFEADFC9);
-const Color eAccent = Color(0xFFD97B4F);
-const Color eAccentSoft = Color(0xFFFBE4D3);
+const Color eBg = Color(0xFFEFF6FF);
+const Color eCard = Color(0xFFFFFFFF);
+const Color eInk = Color(0xFF0E2548);
+const Color eInkSoft = Color(0xFF3C5C8C);
+const Color eLine = Color(0xFFD6E4FF);
+const Color eAccent = Color(0xFF1A6BFF);
+const Color eAccentSoft = Color(0xFFE6F0FF);
 
 class ElderlyManagementScreen extends StatefulWidget {
   const ElderlyManagementScreen({super.key});
@@ -81,7 +81,7 @@ class _ElderlyManagementScreenState extends State<ElderlyManagementScreen> {
         backgroundColor: eCard,
         title: Text(
           '어르신 추가',
-          style: GoogleFonts.notoSerifKr(
+          style: GoogleFonts.notoSansKr(
             fontSize: 18,
             fontWeight: FontWeight.w700,
             color: eInk,
@@ -180,7 +180,7 @@ class _ElderlyManagementScreenState extends State<ElderlyManagementScreen> {
         backgroundColor: eCard,
         title: Text(
           '어르신 삭제',
-          style: GoogleFonts.notoSerifKr(
+          style: GoogleFonts.notoSansKr(
             fontSize: 18,
             fontWeight: FontWeight.w700,
             color: eInk,
@@ -240,7 +240,7 @@ class _ElderlyManagementScreenState extends State<ElderlyManagementScreen> {
         backgroundColor: eCard,
         title: Text(
           '${_elders[elderIndex]['name']} 연락처 관리',
-          style: GoogleFonts.notoSerifKr(
+          style: GoogleFonts.notoSansKr(
             fontSize: 18,
             fontWeight: FontWeight.w700,
             color: eInk,
@@ -364,7 +364,7 @@ class _ElderlyManagementScreenState extends State<ElderlyManagementScreen> {
         backgroundColor: eCard,
         title: Text(
           '연락처 추가',
-          style: GoogleFonts.notoSerifKr(
+          style: GoogleFonts.notoSansKr(
             fontSize: 18,
             fontWeight: FontWeight.w700,
             color: eInk,
@@ -505,7 +505,7 @@ class _ElderlyManagementScreenState extends State<ElderlyManagementScreen> {
         ),
         title: Text(
           '어르신 관리',
-          style: GoogleFonts.notoSerifKr(
+          style: GoogleFonts.notoSansKr(
             fontSize: 20,
             fontWeight: FontWeight.w700,
             color: eInk,
@@ -523,7 +523,7 @@ class _ElderlyManagementScreenState extends State<ElderlyManagementScreen> {
                 // 어르신 목록
                 Text(
                   '현재 관리 중인 어르신 (${_elders.length}명)',
-                  style: GoogleFonts.notoSerifKr(
+                  style: GoogleFonts.notoSansKr(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                     color: eInk,

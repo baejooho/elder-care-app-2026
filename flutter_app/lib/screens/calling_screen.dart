@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-const Color eAccent = Color(0xFFD97B4F);
+const Color eAccent = Color(0xFF1A6BFF);
 
 class CallingScreen extends StatefulWidget {
   final String callerName;
@@ -68,9 +68,9 @@ class _CallingScreenState extends State<CallingScreen>
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                const Color(0xFFE68F5E),
+                const Color(0xFF6F9BFF),
                 eAccent,
-                const Color(0xFFA3502C),
+                const Color(0xFF0E2548),
               ],
               stops: const [0.0, 0.5, 1.0],
             ),
@@ -154,7 +154,7 @@ class _CallingScreenState extends State<CallingScreen>
                   // 이름
                   Text(
                     _callDurationFormattedName,
-                    style: GoogleFonts.notoSerifKr(
+                    style: GoogleFonts.notoSansKr(
                       fontSize: 24,
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
