@@ -37,9 +37,7 @@ class _ElderlyHomePageState extends State<ElderlyHomePage> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: eCard,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
           '로그아웃',
           style: GoogleFonts.notoSansKr(
@@ -114,6 +112,86 @@ class _ElderlyHomePageState extends State<ElderlyHomePage> {
     }
   }
 
+  Widget _buildMenuRow({
+    required IconData icon,
+    required String label,
+  }) {
+    return Row(
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: const Color(0xFFE6F0FF),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, color: eAccent, size: 20),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          label,
+          style: GoogleFonts.notoSansKr(
+            fontSize: 17,
+            fontWeight: FontWeight.w700,
+            color: eInk,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _showConnectionCode() async {
+    final userInfo = await AuthService.getUserInfo();
+    if (!mounted) return;
+
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: eCard,
+        title: Text(
+          '내 연결코드',
+          style: GoogleFonts.notoSansKr(
+            fontSize: 24,
+            fontWeight: FontWeight.w800,
+            color: eInk,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '보호자에게 아래 코드를 알려주세요.',
+              style: GoogleFonts.notoSansKr(fontSize: 16, color: eInkSoft),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              userInfo['connectionCode'] ?? '연결코드가 없습니다.',
+              style: GoogleFonts.notoSansKr(
+                fontSize: 30,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 3,
+                color: eAccent,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              '닫기',
+              style: GoogleFonts.notoSansKr(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: eAccent,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -130,22 +208,58 @@ class _ElderlyHomePageState extends State<ElderlyHomePage> {
                   Padding(
                     padding: const EdgeInsets.only(right: 16),
                     child: Center(
-                      child: Material(
+                      child: PopupMenuButton<String>(
+                        offset: const Offset(0, 48),
                         color: eCard,
-                        shape: const CircleBorder(
-                          side: BorderSide(color: eLine),
+                        elevation: 6,
+                        shadowColor: eInk.withValues(alpha: 0.12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          side: const BorderSide(color: eLine),
                         ),
-                        child: InkWell(
-                          customBorder: const CircleBorder(),
-                          onTap: _confirmLogout,
-                          child: const SizedBox(
-                            width: 44,
-                            height: 44,
-                            child: Icon(
-                              Icons.logout_rounded,
-                              color: eAccent,
-                              size: 22,
+                        onSelected: (value) {
+                          if (value == 'connection_code') {
+                            _showConnectionCode();
+                          } else if (value == 'logout') {
+                            _confirmLogout();
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            value: 'connection_code',
+                            child: _buildMenuRow(
+                              icon: Icons.qr_code_2_rounded,
+                              label: '내 연결코드',
                             ),
+                          ),
+                          const PopupMenuDivider(height: 1),
+                          PopupMenuItem(
+                            value: 'logout',
+                            child: _buildMenuRow(
+                              icon: Icons.logout_rounded,
+                              label: '로그아웃',
+                            ),
+                          ),
+                        ],
+                        child: Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: eCard,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: eLine, width: 1.5),
+                            boxShadow: [
+                              BoxShadow(
+                                color: eAccent.withValues(alpha: 0.08),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.more_horiz_rounded,
+                            color: eAccent,
+                            size: 26,
                           ),
                         ),
                       ),
@@ -155,11 +269,7 @@ class _ElderlyHomePageState extends State<ElderlyHomePage> {
               ),
         body: IndexedStack(
           index: _tabIndex,
-          children: const [
-            MainScreen(),
-            HistoryScreen(),
-            EmergencyScreen(),
-          ],
+          children: const [MainScreen(), HistoryScreen(), EmergencyScreen()],
         ),
         bottomNavigationBar: Container(
           decoration: const BoxDecoration(

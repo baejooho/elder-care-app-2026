@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
@@ -8,37 +10,34 @@ class AuthService {
   static const String _tokenKey = 'auth_token';
   static const String _connectionCodeKey = 'connection_code';
 
-  // Mock 연결코드 (실제로는 백엔드에서 검증)
-  static const String _validConnectionCode = '123456';
-
   // 어르신 회원가입
   static Future<Map<String, dynamic>> elderlySignup({
     required String name,
     required String phone,
-    required String connectionCode,
   }) async {
     try {
-      // 연결코드 검증
-      if (connectionCode != _validConnectionCode) {
-        return {'success': false, 'message': '유효하지 않은 연결 코드입니다.'};
-      }
-
       // 전화번호 중복 확인 (Mock)
       if (phone.length < 10) {
         return {'success': false, 'message': '유효한 전화번호를 입력해주세요.'};
       }
 
+      final connectionCode =
+          Random.secure().nextInt(1000000).toString().padLeft(6, '0');
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_userTypeKey, 'elderly');
       await prefs.setString(_phoneKey, phone);
       await prefs.setString(_nameKey, name);
-      await prefs.setBool(_isLoggedInKey, true);
-      await prefs.setString(_tokenKey, 'mock_token_$phone');
+      await prefs.setString(_connectionCodeKey, connectionCode);
+      await prefs.setBool(_isLoggedInKey, false);
 
       return {
         'success': true,
         'message': '회원가입 성공',
-        'data': {'name': name, 'phone': phone},
+        'data': {
+          'name': name,
+          'phone': phone,
+          'connectionCode': connectionCode,
+        },
       };
     } catch (e) {
       return {'success': false, 'message': '회원가입 실패: $e'};
@@ -89,18 +88,12 @@ class AuthService {
       await prefs.setString(_userTypeKey, 'guardian');
       await prefs.setString(_nameKey, name);
       await prefs.setString('email', email);
-      await prefs.setBool(_isLoggedInKey, true);
-      await prefs.setString(_tokenKey, 'mock_token_$email');
-      await prefs.setString(_connectionCodeKey, _validConnectionCode);
+      await prefs.setBool(_isLoggedInKey, false);
 
       return {
         'success': true,
         'message': '회원가입 성공',
-        'data': {
-          'connectionCode': _validConnectionCode, // 어르신에게 공유할 코드
-          'name': name,
-          'email': email,
-        },
+        'data': {'name': name, 'email': email},
       };
     } catch (e) {
       return {'success': false, 'message': '회원가입 실패: $e'};
@@ -169,8 +162,7 @@ class AuthService {
       'phone': prefs.getString(_phoneKey),
       'name': prefs.getString(_nameKey),
       'email': prefs.getString('email'),
-      'connectionCode':
-          prefs.getString(_connectionCodeKey) ?? _validConnectionCode,
+      'connectionCode': prefs.getString(_connectionCodeKey),
     };
   }
 }

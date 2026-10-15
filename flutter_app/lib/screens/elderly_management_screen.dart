@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../services/auth_service.dart';
 
 const Color eBg = Color(0xFFEFF6FF);
 const Color eCard = Color(0xFFFFFFFF);
@@ -28,21 +29,9 @@ class _ElderlyManagementScreenState extends State<ElderlyManagementScreen> {
       'age': 78,
       'status': '정상',
       'contacts': [
-        {
-          'name': '김보호 (딸)',
-          'relation': '보호자',
-          'number': '010-1234-5678',
-        },
-        {
-          'name': '이효준 (아들)',
-          'relation': '보호자',
-          'number': '010-2345-6789',
-        },
-        {
-          'name': '박은숙 (며느리)',
-          'relation': '보호자',
-          'number': '010-3456-7890',
-        },
+        {'name': '김보호 (딸)', 'relation': '보호자', 'number': '010-1234-5678'},
+        {'name': '이효준 (아들)', 'relation': '보호자', 'number': '010-2345-6789'},
+        {'name': '박은숙 (며느리)', 'relation': '보호자', 'number': '010-3456-7890'},
       ],
     },
     {
@@ -51,16 +40,8 @@ class _ElderlyManagementScreenState extends State<ElderlyManagementScreen> {
       'age': 82,
       'status': '주의',
       'contacts': [
-        {
-          'name': '이순신 (아들)',
-          'relation': '보호자',
-          'number': '010-4567-8901',
-        },
-        {
-          'name': '정욕심 (딸)',
-          'relation': '보호자',
-          'number': '010-5678-9012',
-        },
+        {'name': '이순신 (아들)', 'relation': '보호자', 'number': '010-4567-8901'},
+        {'name': '정욕심 (딸)', 'relation': '보호자', 'number': '010-5678-9012'},
       ],
     },
   ];
@@ -74,6 +55,7 @@ class _ElderlyManagementScreenState extends State<ElderlyManagementScreen> {
   void _addElderly() {
     final nameController = TextEditingController();
     final ageController = TextEditingController();
+    final connectionCodeController = TextEditingController();
 
     showDialog(
       context: context,
@@ -95,6 +77,26 @@ class _ElderlyManagementScreenState extends State<ElderlyManagementScreen> {
               decoration: InputDecoration(
                 hintText: '이름',
                 hintStyle: const TextStyle(color: eInkSoft),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: eLine),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: connectionCodeController,
+              keyboardType: TextInputType.number,
+              maxLength: 6,
+              decoration: InputDecoration(
+                labelText: '어르신 연결코드',
+                hintText: '6자리 숫자를 입력해주세요',
+                hintStyle: const TextStyle(color: eInkSoft),
+                counterText: '',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: const BorderSide(color: eLine),
@@ -137,27 +139,73 @@ class _ElderlyManagementScreenState extends State<ElderlyManagementScreen> {
             ),
           ),
           TextButton(
-            onPressed: () {
-              if (nameController.text.isNotEmpty &&
-                  ageController.text.isNotEmpty) {
-                setState(() {
-                  _elders.add({
-                    'id': _elders.length + 1,
-                    'name': nameController.text,
-                    'age': int.parse(ageController.text),
-                    'status': '정상',
-                    'contacts': [],
-                  });
-                });
-                Navigator.pop(context);
+            onPressed: () async {
+              final code = connectionCodeController.text.trim();
+              final age = int.tryParse(ageController.text.trim());
+
+              if (!RegExp(r'^\d{6}$').hasMatch(code)) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('어르신이 추가되었습니다.'),
-                    backgroundColor: eAccent,
-                    duration: Duration(seconds: 2),
+                    content: Text('6자리 숫자 연결코드를 입력해주세요.'),
+                    backgroundColor: Color(0xFFF44336),
                   ),
                 );
+                return;
               }
+
+              if (nameController.text.trim().isEmpty || age == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('이름과 나이를 입력해주세요.'),
+                    backgroundColor: Color(0xFFF44336),
+                  ),
+                );
+                return;
+              }
+
+              final userInfo = await AuthService.getUserInfo();
+              if (!context.mounted) return;
+
+              if (userInfo['connectionCode'] != code) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('일치하는 어르신 연결코드가 없습니다.'),
+                    backgroundColor: Color(0xFFF44336),
+                  ),
+                );
+                return;
+              }
+
+              if (_elders.any((elder) => elder['connectionCode'] == code)) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('이미 추가된 어르신입니다.'),
+                    backgroundColor: Color(0xFFF44336),
+                  ),
+                );
+                return;
+              }
+
+              if (!mounted || !context.mounted) return;
+              setState(() {
+                _elders.add({
+                  'id': _elders.length + 1,
+                  'name': nameController.text.trim(),
+                  'age': age,
+                  'phone': userInfo['phone'],
+                  'connectionCode': code,
+                  'status': '정상',
+                  'contacts': [],
+                });
+              });
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('어르신이 추가되었습니다.'),
+                  backgroundColor: eAccent,
+                  duration: Duration(seconds: 2),
+                ),
+              );
             },
             child: Text(
               '추가',
@@ -188,10 +236,7 @@ class _ElderlyManagementScreenState extends State<ElderlyManagementScreen> {
         ),
         content: Text(
           '${_elders[index]['name']}을(를) 정말로 삭제하시겠습니까?',
-          style: GoogleFonts.notoSansKr(
-            fontSize: 14,
-            color: eInkSoft,
-          ),
+          style: GoogleFonts.notoSansKr(fontSize: 14, color: eInkSoft),
         ),
         actions: [
           TextButton(
@@ -255,10 +300,7 @@ class _ElderlyManagementScreenState extends State<ElderlyManagementScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   child: Text(
                     '등록된 연락처가 없습니다.',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: eInkSoft,
-                    ),
+                    style: TextStyle(fontSize: 14, color: eInkSoft),
                   ),
                 )
               else
@@ -498,10 +540,7 @@ class _ElderlyManagementScreenState extends State<ElderlyManagementScreen> {
           ),
           onPressed: () => Navigator.pop(context),
           padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(
-            minWidth: 44,
-            minHeight: 44,
-          ),
+          constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
         ),
         title: Text(
           '어르신 관리',
@@ -537,10 +576,7 @@ class _ElderlyManagementScreenState extends State<ElderlyManagementScreen> {
                     alignment: Alignment.center,
                     child: Text(
                       '관리 중인 어르신이 없습니다.',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: eInkSoft,
-                      ),
+                      style: TextStyle(fontSize: 16, color: eInkSoft),
                     ),
                   )
                 else
@@ -573,7 +609,7 @@ class _ElderlyManagementScreenState extends State<ElderlyManagementScreen> {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      '${_elders[index]['age']}세 • ${_elders[index]['status']}',
+                                      '${_elders[index]['age']}세',
                                       style: TextStyle(
                                         fontSize: 14,
                                         color: eInkSoft,
@@ -599,11 +635,14 @@ class _ElderlyManagementScreenState extends State<ElderlyManagementScreen> {
                                     vertical: 6,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFF44336).withOpacity(0.1),
+                                    color: const Color(
+                                      0xFFF44336,
+                                    ).withOpacity(0.1),
                                     borderRadius: BorderRadius.circular(6),
                                     border: Border.all(
-                                      color: const Color(0xFFF44336)
-                                          .withOpacity(0.3),
+                                      color: const Color(
+                                        0xFFF44336,
+                                      ).withOpacity(0.3),
                                     ),
                                   ),
                                   child: Text(

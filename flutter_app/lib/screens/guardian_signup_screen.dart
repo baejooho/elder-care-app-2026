@@ -24,6 +24,7 @@ class _GuardianSignupScreenState extends State<GuardianSignupScreen> {
   final TextEditingController _passwordConfirmController =
       TextEditingController();
   bool _isLoading = false;
+  bool _isSignupComplete = false;
   String? _errorMessage;
   bool _obscurePassword = true;
   bool _obscurePasswordConfirm = true;
@@ -82,11 +83,9 @@ class _GuardianSignupScreenState extends State<GuardianSignupScreen> {
     });
 
     if (result['success']) {
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const GuardianLoginScreen()),
-      );
+      setState(() {
+        _isSignupComplete = true;
+      });
     } else {
       setState(() {
         _errorMessage = result['message'];
@@ -96,6 +95,10 @@ class _GuardianSignupScreenState extends State<GuardianSignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isSignupComplete) {
+      return _buildSignupCompleteScreen();
+    }
+
     return Scaffold(
       backgroundColor: eBg,
       appBar: AppBar(
@@ -356,6 +359,74 @@ class _GuardianSignupScreenState extends State<GuardianSignupScreen> {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSignupCompleteScreen() {
+    return Scaffold(
+      backgroundColor: eBg,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 32),
+            child: Column(
+              children: [
+                const Icon(
+                  Icons.check_circle_rounded,
+                  color: eAccent,
+                  size: 72,
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  '회원가입이 완료되었습니다',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.notoSansKr(
+                    fontSize: 25,
+                    fontWeight: FontWeight.w700,
+                    color: eInk,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  '가입하신 계정으로 로그인해주세요.',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.notoSansKr(fontSize: 16, color: eInkSoft),
+                ),
+                const SizedBox(height: 36),
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const GuardianLoginScreen(),
+                        ),
+                        (route) => false,
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: eAccent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      '로그인하러 가기',
+                      style: GoogleFonts.notoSansKr(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
