@@ -179,27 +179,6 @@ class _GuardianAccountScreenState extends State<GuardianAccountScreen> {
                                   color: eInkSoft,
                                 ),
                               ),
-                              const SizedBox(height: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: const Color(
-                                    0xFF4CAF50,
-                                  ).withOpacity(0.15),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: const Text(
-                                  '활성 중',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF4CAF50),
-                                  ),
-                                ),
-                              ),
                             ],
                           ),
                         ),

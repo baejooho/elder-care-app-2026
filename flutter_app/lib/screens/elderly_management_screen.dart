@@ -89,14 +89,11 @@ class _ElderlyManagementScreenState extends State<ElderlyManagementScreen> {
             ),
             const SizedBox(height: 12),
             TextField(
-              controller: connectionCodeController,
+              controller: ageController,
               keyboardType: TextInputType.number,
-              maxLength: 6,
               decoration: InputDecoration(
-                labelText: '어르신 연결코드',
-                hintText: '6자리 숫자를 입력해주세요',
+                hintText: '나이',
                 hintStyle: const TextStyle(color: eInkSoft),
-                counterText: '',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: const BorderSide(color: eLine),
@@ -109,11 +106,14 @@ class _ElderlyManagementScreenState extends State<ElderlyManagementScreen> {
             ),
             const SizedBox(height: 12),
             TextField(
-              controller: ageController,
+              controller: connectionCodeController,
               keyboardType: TextInputType.number,
+              maxLength: 6,
               decoration: InputDecoration(
-                hintText: '나이',
+                labelText: '어르신 연결코드',
+                hintText: '6자리 숫자를 입력해주세요',
                 hintStyle: const TextStyle(color: eInkSoft),
+                counterText: '',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: const BorderSide(color: eLine),

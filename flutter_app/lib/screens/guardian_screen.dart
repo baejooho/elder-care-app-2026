@@ -539,7 +539,7 @@ class _GuardianScreenState extends State<GuardianScreen> {
                         decoration: BoxDecoration(
                           color: elder['hasTalked']
                               ? const Color(0xFF4CAF50)
-                              : const Color(0xFFFFA726),
+                              : const Color(0xFFFF0000),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
